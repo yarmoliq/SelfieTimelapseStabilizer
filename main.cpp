@@ -1,84 +1,53 @@
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include "opencv2/objdetect.hpp"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/face/facemark.hpp>
 #include <iostream>
 
 using namespace cv;
+using namespace face;
 
-CascadeClassifier face_cascade;
-CascadeClassifier eyes_cascade;
-CascadeClassifier mouth_cascade;
-
-Mat detect(Mat frame);
-
-int main()
+int main(int argc, char **argv)
 {
-    Mat image = imread("/mnt/c/Users/yarmo/Desktop/image.jpg", IMREAD_COLOR);
+    CascadeClassifier face_cascade;
+    face_cascade.load("models/haar/frontalface_alt.xml");
 
-    String face_cascade_name = samples::findFile("cascades/frontalface_alt.xml");
-    String eyes_cascade_name = samples::findFile("cascades/eye_tree_eyeglasses.xml");
-    String mouth_cascade_name = samples::findFile("cascades/mouth.xml");
+    Mat img = imread(argv[1]);
+    Ptr<Facemark> facemark = createFacemarkKazemi();
+    facemark->loadModel("models/face_landmark_model.dat");
 
-    if( !face_cascade.load( face_cascade_name ) )
+    std::vector<Rect> faces;
+    // resize(img,img,Size(460,460),0,0,INTER_LINEAR_EXACT);
+
+    Mat gray;
+    if(img.channels()>1){
+        cvtColor(img, gray, COLOR_BGR2GRAY);
+    }
+    else{
+        gray = img.clone();
+    }
+
+    equalizeHist( gray, gray );
+    face_cascade.detectMultiScale( gray, faces, 1.1, 3,0, Size(30, 30) );
+
+    std::vector< std::vector<Point2f> > shapes;
+    if (facemark->fit(img,faces,shapes))
     {
-        std::cout << "--(!)Error loading face cascade\n";
-        return -1;
-    };
-    if( !eyes_cascade.load( eyes_cascade_name ) )
-    {
-        std::cout << "--(!)Error loading eyes cascade\n";
-        return -1;
-    };
-    if( !mouth_cascade.load( mouth_cascade_name ) )
-    {
-        std::cout << "--(!)Error loading mouth cascade\n";
-        return -1;
-    };
+        for ( size_t i = 0; i < faces.size(); i++ )
+        {
+            rectangle(img,faces[i], Scalar( 255, 0, 0 ), 4);
+        }
+        for (unsigned long i=0;i<faces.size();i++)
+        {
+            for(unsigned long k=0;k<shapes[i].size();k++)
+                circle(img, shapes[i][k], 5, Scalar(0,0,255), 4);
+        }
+    }
 
-
-    imwrite("/mnt/c/Users/yarmo/Desktop/output.png", detect(image));
+    imwrite("../output.png", img);
 
     return 0;
-}
-
-Mat detect(Mat frame )
-{
-    Mat frame_gray;
-    cvtColor( frame, frame_gray, COLOR_BGR2GRAY );
-    equalizeHist( frame_gray, frame_gray );
-
-    // std::vector<Rect> faces;
-    // face_cascade.detectMultiScale( frame_gray, faces );
-
-    // for ( size_t i = 0; i < faces.size(); i++ )
-    // {
-    //     Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
-    //     ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4 );
-
-    //     Mat faceROI = frame_gray( faces[i] );
-
-    std::vector<Rect> eyes;
-    eyes_cascade.detectMultiScale(frame_gray, eyes);
-
-    for ( size_t j = 0; j < eyes.size(); j++ )
-    {
-        Point eye_center( eyes[j].x + eyes[j].width/2, eyes[j].y + eyes[j].height/2 );
-        int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-        circle( frame, eye_center, radius, Scalar( 255, 0, 0 ), 4 );
-    }
-    
-    std::vector<Rect> mouths;
-    mouth_cascade.detectMultiScale(frame_gray, mouths);
-
-    for ( size_t j = 0; j < mouths.size(); j++ )
-    {
-        Point mouth_center( mouths[j].x + mouths[j].width/2, mouths[j].y + mouths[j].height/2 );
-        int radius = cvRound( (mouths[j].width + mouths[j].height)*0.25 );
-        // circle( frame, mouth_center, radius, Scalar( 255, 0, 0 ), 4 );
-        rectangle(frame, Point(mouths[j].x, mouths[j].y), Point(mouths[j].x + mouths[j].width, mouths[j].y + mouths[j].height), Scalar(255, 0, 0), 4);
-    }
-    // }
-    return frame;
 }
