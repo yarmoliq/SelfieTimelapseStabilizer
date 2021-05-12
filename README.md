@@ -5,7 +5,7 @@ This smol program will take an array of images (selfies) and stabilize your face
 ## Build
 
 ### Dependencies:
-- [opencv](https://github.com/opencv/opencv)
+- [opencv](https://github.com/opencv/opencv) + [opencv_contrib](https://github.com/opencv/opencv_contrib)
 
 To build the project run:
 ```console
