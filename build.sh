@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -d "/path/to/dir" ]
+if [ ! -d "build/" ]
 then
     mkdir build
 fi
