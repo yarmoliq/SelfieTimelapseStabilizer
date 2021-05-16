@@ -1,13 +1,14 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
-#include "opencv2/objdetect.hpp"
+#include <opencv2/objdetect.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/face/facemark.hpp>
 #include <iostream>
 
 #include "visualize/visualize.h"
+#include "exif/exif.h"
 
 using namespace cv;
 using namespace face;
@@ -17,7 +18,7 @@ const unsigned int OUTPUT_HEIGHT = 2160;
 
 int main(int argc, char **argv)
 {
-    Mat img = imread(argv[1]);
+    Mat img = imread(argv[1], IMREAD_UNCHANGED);
 
     CascadeClassifier face_cascade;
     face_cascade.load("models/haar/frontalface_alt.xml");
