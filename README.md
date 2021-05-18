@@ -12,3 +12,7 @@ To build the project run:
 ```sh
 ./build.sh
 ```
+To run the project run:
+```sh
+build/sts image.jpg
+```
