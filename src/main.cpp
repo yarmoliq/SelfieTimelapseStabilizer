@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "visualize/visualize.h"
-#include "exif/exif.h"
+#include "imgManipulation/manipulation.h"
 
 using namespace cv;
 using namespace face;
@@ -18,7 +18,7 @@ const unsigned int OUTPUT_HEIGHT = 2160;
 
 int main(int argc, char **argv)
 {
-    Mat img = imread(argv[1], IMREAD_UNCHANGED);
+    Mat original = imread(argv[1], IMREAD_COLOR);
 
     CascadeClassifier face_cascade;
     face_cascade.load("models/haar/frontalface_alt.xml");
@@ -26,7 +26,9 @@ int main(int argc, char **argv)
     Ptr<Facemark> facemark = createFacemarkLBF();
     facemark->loadModel("models/lbfmodel.yaml");
 
-    // resize(img,img,Size(960,960),0,0,INTER_LINEAR_EXACT);
+    Mat img;
+
+    inscribeInto(original, img, Size(960, 960));
 
     Mat gray;
     cvtColor(img, gray, COLOR_BGR2GRAY);
@@ -46,8 +48,10 @@ int main(int argc, char **argv)
         return 0;
     }
     
-    std::vector<Point2f> lm = landmarks[0];
-    auto output = visualizeLandmarks(img, lm);
+    std::vector<Point2f> lm;
+    scaleVector(landmarks[0], lm, (float)original.cols / (float)img.cols);
+
+    auto output = visualizeLandmarks(original, lm);
     imwrite("../photos/output.png", output);
 
     return 0;
