@@ -51,7 +51,8 @@ int main(int argc, char **argv)
     std::vector<Point2f> lm;
     scaleVector(landmarks[0], lm, (float)original.cols / (float)img.cols);
 
-    auto output = visualizeLandmarks(original, lm);
+    Mat output;
+    visualizeLandmarks(original, output, lm);
     imwrite("../photos/output.png", output);
 
     return 0;
