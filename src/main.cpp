@@ -23,8 +23,8 @@ int main(int argc, char **argv)
     CascadeClassifier face_cascade;
     face_cascade.load("models/haar/frontalface_alt.xml");
 
-    Ptr<Facemark> facemark = createFacemarkKazemi();
-    facemark->loadModel("models/face_landmark_model.dat");
+    Ptr<Facemark> facemark = createFacemarkLBF();
+    facemark->loadModel("models/lbfmodel.yaml");
 
     // resize(img,img,Size(960,960),0,0,INTER_LINEAR_EXACT);
 
