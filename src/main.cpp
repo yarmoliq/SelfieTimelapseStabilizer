@@ -5,54 +5,41 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/face/facemark.hpp>
+
 #include <iostream>
+#include <string>
+#include <math.h>
+#include <filesystem>
 
 #include "visualize/visualize.h"
 #include "imgManipulation/manipulation.h"
 
 using namespace cv;
 using namespace face;
+namespace fs = std::filesystem;
 
 const unsigned int OUTPUT_WIDTH  = 3840;
 const unsigned int OUTPUT_HEIGHT = 2160;
 
 int main(int argc, char **argv)
 {
-    Mat original = imread(argv[1], IMREAD_COLOR);
+    Mat reference = imread(argv[1], IMREAD_COLOR);
 
-    CascadeClassifier face_cascade;
-    face_cascade.load("models/haar/frontalface_alt.xml");
+    loadModels();
 
-    Ptr<Facemark> facemark = createFacemarkLBF();
-    facemark->loadModel("models/lbfmodel.yaml");
+    setReferencePoints(reference);
 
-    Mat img;
+    Mat output(OUTPUT_HEIGHT, OUTPUT_WIDTH, CV_8UC3);
 
-    inscribeInto(original, img, Size(960, 960));
+    std::string outDir = argv[3];
 
-    Mat gray;
-    cvtColor(img, gray, COLOR_BGR2GRAY);
-
-    // equalizeHist( gray, gray );
-    // adaptive histogram equalization
-    auto cl = createCLAHE(2, Size(8, 8));
-    cl->apply(gray, gray);
-
-    std::vector<Rect> faces;
-    face_cascade.detectMultiScale( gray, faces, 1.1, 3,0, Size(30, 30) );
-    
-    std::vector< std::vector<Point2f> > landmarks;
-    if (!facemark->fit(img, faces, landmarks))
+    size_t counter = 0;
+    for (const auto & entry : fs::directory_iterator(argv[2]))
     {
-        std::cout << "Could not landmark any faces :(\n";
-        return 0;
+        Mat img = imread(entry.path(), IMREAD_COLOR);
+        warpStabilize(img, output);
+        imwrite(outDir + std::to_string(counter++) + ".jpg", output);
     }
-    
-    std::vector<Point2f> lm;
-    scaleVector(landmarks[0], lm, (float)original.cols / (float)img.cols);
-
-    auto output = visualizeLandmarks(original, lm);
-    imwrite("../photos/output.png", output);
 
     return 0;
 }
