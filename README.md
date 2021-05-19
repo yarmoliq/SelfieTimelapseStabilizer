@@ -1,6 +1,6 @@
 # Selfie Timelapse Stabilizer
 
-This smol program will take an array of images (selfies) and stabilize your face :) so it is in the same positions across all frames.
+This smol program will take an array of images (selfies) and stabilize your face :) so it is in the same position across all frames.
 
 ## Build
 
