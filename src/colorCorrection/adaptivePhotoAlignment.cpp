@@ -1,6 +1,6 @@
 #include "adaptivePhotoAlignment.h"
 
-void adaptiveAlignment(Mat& src)
+void adaptiveAlignment(Mat& src, Mat& out)
 {
     // Split the image into different channels
     std::vector<Mat> rgbChannels = std::vector<Mat>(3);
@@ -13,5 +13,5 @@ void adaptiveAlignment(Mat& src)
     cl->apply(rgbChannels[2], rgbChannels[2]);
 
     // Merging chanels
-    merge(rgbChannels, src);
+    merge(rgbChannels, out);
 }

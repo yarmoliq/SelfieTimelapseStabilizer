@@ -11,6 +11,8 @@
 #include "exif/exif.h"
 #include "colorCorrection/adaptivePhotoAlignment.h"
 
+#include "colorCorrection/colorCorrection.h"
+
 using namespace cv;
 using namespace face;
 
@@ -19,38 +21,11 @@ const unsigned int OUTPUT_HEIGHT = 2160;
 
 int main(int argc, char **argv)
 {
-    Mat img = imread(argv[1], IMREAD_UNCHANGED);
+    Mat img1 = imread(argv[1], IMREAD_COLOR);
+    Mat img2 = imread(argv[2], IMREAD_COLOR);
+    Mat output;
     
-    CascadeClassifier face_cascade;
-    face_cascade.load("models/haar/frontalface_alt.xml");
-
-    Ptr<Facemark> facemark = createFacemarkLBF();
-    facemark->loadModel("models/lbfmodel.yaml");
-
-    // resize(img,img,Size(960,960),0,0,INTER_LINEAR_EXACT);
-
-    Mat gray;
-    cvtColor(img, gray, COLOR_BGR2GRAY);
-
-    // equalizeHist( gray, gray );
-    // adaptive histogram equalization
-    auto cl = createCLAHE(2, Size(8, 8));
-    cl->apply(gray, gray);
-
-    std::vector<Rect> faces;
-    face_cascade.detectMultiScale( gray, faces, 1.5, 3, 20, Size(100, 500) );
-    
-    std::vector< std::vector<Point2f> > landmarks;
-    if (!facemark->fit(img, faces, landmarks))
-    {
-        std::cout << "Could not landmark any faces :(\n";
-        return 0;
-    }
-    
-    std::vector<Point2f> lm = landmarks[0];
-    
-    adaptiveAlignment(img);
-    auto output = visualizeLandmarks(img, lm);
+    colorCorrection(img2, img1, output, false, true);
     imwrite("../photos/output.png", output);
 
     return 0;

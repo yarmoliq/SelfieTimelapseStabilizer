@@ -10,4 +10,4 @@
 
 using namespace cv;
 
-void adaptiveAlignment(Mat& src);
+void adaptiveAlignment(Mat& src, Mat& out);
