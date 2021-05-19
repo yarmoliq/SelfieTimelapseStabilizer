@@ -8,4 +8,4 @@
 
 using namespace cv;
 
-void visualizeLandmarks(const Mat& src, Mat& dst, const std::vector<Point2f>& landmarks);
+void visualizeLandmarks(const Mat& src, Mat& dst, const std::vector<Point2f>& landmarks, bool putNumbers = false);
