@@ -26,10 +26,12 @@ using namespace ccm;
 //      aesthetically pleasing results.
 //      If False then target chanels will scaled using the reciprocal of
 //      the scaling factor proposed in the paper.
-void colorCorrection(Mat &target, Mat &source, Mat &out, bool minMaxNormalization = false, bool preservePaper = true);
+void colorCorrection(Mat &target, Mat &source, Mat &out, bool adaptiveRange = false, bool preservePaper = true);
 
-//normalization array
-void normalize(Mat &array, Mat &out, bool minMaxNormalization = true);
+//fix min and max values in image
+//if adaptiveRange is false, range = [0, 255]
+//if adaptiveRange is false, range = [min or if min < 0 is 0, max of if max > 255 is 255]
+void fixExtremValues(Mat &image, Mat &out, bool adaptiveRange = false);
 
 //get information about image
 void imageStats(const Mat &image, Scalar &lMean, Scalar &aMean, Scalar &bMean, Scalar &lStd, Scalar &aStd, Scalar &bStd);

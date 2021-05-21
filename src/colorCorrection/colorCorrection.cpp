@@ -9,63 +9,76 @@ void imageStats(const Mat &image, Scalar &lMean, Scalar &aMean, Scalar &bMean, S
     meanStdDev(chanels[2], bMean, bStd);
 }
 
-void normalize(Mat &array, Mat &out, const bool minMaxNormalization)
+void fixExtremValues(Mat &image, Mat &out, const bool adaptiveRange)
 {
     double min, max;
-    if (minMaxNormalization)
+
+    minMaxIdx(image, &min, &max);
+    if (!adaptiveRange || min < 0 || max > 255)
     {
-        minMaxIdx(array, &min, &max);
         double minA = min > 0 ? min : 0;
         double maxA = max < 255 ? max : 255;
-        if (min < 0 || max > 255)
-        {
-            out = (maxA - minA) * (array - min) / (max - min) + minA;
-        }
-        else
-        {
-            out = array;
-        }
+        out = (maxA - minA) * (image - min) / (max - min) + minA;
     }
     else
     {
-        min = 0;
-        max = 255;
-        // adaptiveAlignment(array, out);
-        normalize(array, out, min, max, NORM_MINMAX);
+        out = image;
+        for (int i = 0; i < out.size().width; ++i)
+        {
+            for (int j = 0; j < out.size().height; ++j)
+            {
+                auto &colors = out.at<Vec3f>(i, j);
+                for (int k = 0; k < colors.rows; ++k)
+                {
+                    if (colors[k] > 255)
+                    {
+                        colors[k] = 255;
+                    }
+                    else if (colors[k] < 0)
+                    {
+                        colors[k] = 0;
+                    }
+                }
+            }
+        }
     }
 }
 
-void colorCorrection(Mat &target, Mat &source, Mat &out, const bool minMaxNormalization, const bool preservePaper)
+// variables with _ is locally
+void colorCorrection(Mat &target, Mat &source, Mat &out, const bool adaptiveRange, const bool preservePaper)
 {
     cvtColor(source, source, COLOR_BGR2Lab);
     cvtColor(target, target, COLOR_BGR2Lab);
-
+    Mat source_ = Mat(source.size(), CV_32F);
+    source.convertTo(source_, CV_32F);
+    Mat target_ = Mat(target.size(), CV_32F);
+    target.convertTo(target_, CV_32F);
     Scalar lMeanSrc, aMeanSrc, bMeanSrc, lStdSrc, aStdSrc, bStdSrc;
-    imageStats(source, lMeanSrc, aMeanSrc, bMeanSrc, lStdSrc, aStdSrc, bStdSrc);
+    imageStats(source_, lMeanSrc, aMeanSrc, bMeanSrc, lStdSrc, aStdSrc, bStdSrc);
 
     Scalar lMeanTarget, aMeanTarget, bMeanTarget, lStdTarget, aStdTarget, bStdTarget;
-    imageStats(target, lMeanTarget, aMeanTarget, bMeanTarget, lStdTarget, aStdTarget, bStdTarget);
+    imageStats(target_, lMeanTarget, aMeanTarget, bMeanTarget, lStdTarget, aStdTarget, bStdTarget);
 
     std::vector<Mat> chanelsTarget;
-    split(target, chanelsTarget);
+    split(target_, chanelsTarget);
 
     chanelsTarget[0] -= lMeanTarget;
     chanelsTarget[1] -= aMeanTarget;
     chanelsTarget[2] -= bMeanTarget;
 
-    if (preservePaper)
+    if (!preservePaper)
     {
         // scale by the standard deviations using paper proposed factor
-        multiply(chanelsTarget[0], (lStdTarget / lStdSrc), chanelsTarget[0]);
-        multiply(chanelsTarget[1], (aStdTarget / aStdSrc), chanelsTarget[1]);
-        multiply(chanelsTarget[2], (bStdTarget / bStdSrc), chanelsTarget[2]);
+        multiply(chanelsTarget[0], (lStdTarget[0] / lStdSrc[0]), chanelsTarget[0]);
+        multiply(chanelsTarget[1], (aStdTarget[0] / aStdSrc[0]), chanelsTarget[1]);
+        multiply(chanelsTarget[2], (bStdTarget[0] / bStdSrc[0]), chanelsTarget[2]);
     }
     else
     {
         // scale by the standard deviations using reciprocal of paper proposed factor
-        multiply(chanelsTarget[0], (lStdSrc / lStdTarget), chanelsTarget[0]);
-        multiply(chanelsTarget[1], (aStdSrc / aStdTarget), chanelsTarget[1]);
-        multiply(chanelsTarget[2], (bStdSrc / bStdTarget), chanelsTarget[2]);
+        chanelsTarget[0] = (lStdSrc[0] / lStdTarget[0]) * chanelsTarget[0];
+        chanelsTarget[1] = (aStdSrc[0] / aStdTarget[0]) * chanelsTarget[1];
+        chanelsTarget[2] = (bStdSrc[0] / bStdTarget[0]) * chanelsTarget[2];
     }
 
     chanelsTarget[0] += lMeanSrc;
@@ -74,12 +87,14 @@ void colorCorrection(Mat &target, Mat &source, Mat &out, const bool minMaxNormal
 
     // clip/scale the pixel intensities to [0, 255] if they fall
     // outside this range
-    normalize(chanelsTarget[0], chanelsTarget[0], minMaxNormalization);
-    normalize(chanelsTarget[1], chanelsTarget[1], minMaxNormalization);
-    normalize(chanelsTarget[2], chanelsTarget[2], minMaxNormalization);
+    fixExtremValues(chanelsTarget[0], chanelsTarget[0], adaptiveRange);
+    fixExtremValues(chanelsTarget[1], chanelsTarget[1], adaptiveRange);
+    fixExtremValues(chanelsTarget[2], chanelsTarget[2], adaptiveRange);
 
     //create  out mat and merge all convert color
-    out = Mat(target.size(), target.type());
-    merge(chanelsTarget, out);
+    Mat out_ = Mat(target_.size(), target_.type());
+    merge(chanelsTarget, out_);
+    out = Mat(target_.size(), CV_8U);
+    out_.convertTo(out, CV_8U);
     cvtColor(out, out, COLOR_Lab2BGR);
 }
