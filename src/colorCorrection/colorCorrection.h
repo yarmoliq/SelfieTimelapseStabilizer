@@ -33,6 +33,9 @@ void colorCorrection(Mat &target, Mat &source, Mat &out, bool adaptiveRange = fa
 //color correction better when source is face of source
 void colorCorrection(Mat &target, Mat &face, Mat &source, Mat &out, bool adaptiveRange = false, bool preservePaper = true);
 
+//apply color correction to image, when target, face and source is COLOR_BGR2Lab and CV_32F
+void colorCorrectionWithoutConversion(Mat &target, Mat &face, Mat &source, Mat &out, const bool adaptiveRange, const bool preservePaper);
+
 //fix min and max values in image
 //if adaptiveRange is false, range = [0, 255]
 //if adaptiveRange is false, range = [min or if min < 0 is 0, max of if max > 255 is 255]
