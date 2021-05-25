@@ -12,7 +12,16 @@ To build the project run:
 ```sh
 ./build.sh
 ```
-To run the project run:
+## Use
+
+To use the program run it with the following arguments:
 ```sh
-build/sts image.jpg
+build/sts path/to/referencePhoto.jpg path/to/inputDir/ path/to/outputDir/
 ```
+where:
+
+`path/to/referencePhoto.jpg` - path to the reference photo, which will determine the position of the face.<br/>
+`path/to/inputDir/` - path to the directory with imges that you want to proccess.<br/>
+`path/to/outputDir/` - path to the directory that will store the proccessed images.<br/>
+
+> :warning: **Note that you have to have the `/` in the end of your directory** because the program is in early development and we haven't implemented such a nicety yet.
