@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/face/facemark.hpp>
+#include <opencv2/videoio.hpp>
 
 #include <iostream>
 #include <string>
@@ -13,6 +14,7 @@
 
 #include "visualize/visualize.h"
 #include "imgManipulation/manipulation.h"
+#include "creatingVideo/creatingVideo.h"
 
 using namespace cv;
 using namespace face;
@@ -32,14 +34,21 @@ int main(int argc, char **argv)
     Mat output(OUTPUT_HEIGHT, OUTPUT_WIDTH, CV_8UC3);
 
     std::string outDir = argv[3];
+    fs::create_directory(outDir);
+    fs::create_directory(outDir + "photos/");
+
+    VideoWriter video;
+    createVideoWritter(video, outDir + "result0.avi", Size(OUTPUT_WIDTH, OUTPUT_HEIGHT), 1);
 
     size_t counter = 0;
     for (const auto & entry : fs::directory_iterator(argv[2]))
     {
         Mat img = imread(entry.path(), IMREAD_COLOR);
         warpStabilize(img, output);
-        imwrite(outDir + std::to_string(counter++) + ".jpg", output);
+        addImageToVideo(video, output);
+        imwrite(outDir + "photos/" + std::to_string(counter++) + ".jpg", output);
     }
 
+    renderVideo(video);
     return 0;
 }

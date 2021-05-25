@@ -12,9 +12,9 @@ void createVideo(const String &name, const vector<Mat> &images, Size size, int v
     renderVideo(video);
 }
 
-void createVideoWritter(VideoWriter& video, const String &name, Size size, int fps) 
+void createVideoWritter(VideoWriter& video, const String &name, Size size, int fps)
 {
-    video.open(name, CAP_OPENCV_MJPEG, fps, size);
+    video.open(name, VideoWriter::fourcc('M','J','P','G'), fps, size);
 }
 
 void addImageToVideo(VideoWriter &video, const Mat &image)
