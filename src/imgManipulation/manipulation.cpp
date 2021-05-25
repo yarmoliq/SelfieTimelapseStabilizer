@@ -24,3 +24,13 @@ void scaleVector(const std::vector<Point2f>& inVec, std::vector<Point2f>& outVec
         point.y *= k;
     }
 }
+
+void detectFace(const Mat& src, Mat& outFace)
+{
+    std::vector<Rect> faces;
+    Mat gray;
+    cvtColor(src, gray, COLOR_BGR2GRAY);
+    face_cascade.detectMultiScale( gray, faces, 1.1, 3, 0, Size(30, 30) );
+    outFace = Mat(src.size(), src.type());
+    src(faces[0]).copyTo(outFace);
+}

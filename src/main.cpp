@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     for (const auto & entry : fs::directory_iterator(argv[2]))
     {
         Mat img = imread(entry.path(), IMREAD_COLOR);
-        warpStabilize(img, output);
+        warpStabilize(img, output, reference);
         addImageToVideo(video, output);
         imwrite(outDir + "photos/" + std::to_string(counter++) + ".jpg", output);
     }
