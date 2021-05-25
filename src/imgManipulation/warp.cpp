@@ -16,7 +16,7 @@ void loadModels()
     facemark->loadModel("models/lbfmodel.yaml");
 }
 
-void warpStabilize(const Mat& src, Mat& dst)
+void warpStabilize(const Mat& src, Mat& dst, const Mat& ccref)
 {
     std::vector<Point2f> landmarks;
     calculateLandmarks(src, landmarks);
@@ -28,9 +28,20 @@ void warpStabilize(const Mat& src, Mat& dst)
         landmarks[LM3]
     };
 
+    Mat srcFace;
+    detectFace(ccref, srcFace);
+    imwrite("../debug/srcface.jpg", srcFace);
+    Mat dstFace;
+    detectFace(src, dstFace);
+    imwrite("../debug/dstface.jpg", dstFace);
+
+    Mat cced(src);
+    colorCorrection(src, dstFace, srcFace, cced);
+    imwrite("../debug/cced.jpg", cced);
+
     Mat warp_mat = getAffineTransform( srcTri, referenceLandmarks );
 
-    warpAffine( src, dst, warp_mat, dst.size() );
+    warpAffine( cced, dst, warp_mat, dst.size() );
 }
 
 void setReferencePoints(const Mat& reference)

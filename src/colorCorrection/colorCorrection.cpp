@@ -57,7 +57,7 @@ void colorCorrection(Mat &target, Mat &source, Mat &out, const bool adaptiveRang
     colorCorrectionWithoutConversion(target_, target_, source_, out, adaptiveRange, preservePaper);
 }
 
-void colorCorrection(Mat &target, Mat &face, Mat &source, Mat &out, const bool adaptiveRange, const bool preservePaper)
+void colorCorrection(const Mat &target, Mat &face, Mat &source, Mat &out, const bool adaptiveRange, const bool preservePaper)
 {
     cvtColor(source, source, COLOR_BGR2Lab);
     cvtColor(face, face, COLOR_BGR2Lab);
@@ -113,9 +113,9 @@ void colorCorrectionWithoutConversion(Mat &target, Mat &face, Mat &source, Mat &
     fixExtremValues(chanelsTarget[2], chanelsTarget[2], adaptiveRange);
 
     //create  out mat and merge all convert color
-    Mat out = Mat(target.size(), target.type());
+    out = Mat(target.size(), target.type());
     merge(chanelsTarget, out);
-    out = Mat(target.size(), CV_8U);
+    //out = Mat(target.size(), CV_8UC3);
     out.convertTo(out, CV_8U);
     cvtColor(out, out, COLOR_Lab2BGR);
 }

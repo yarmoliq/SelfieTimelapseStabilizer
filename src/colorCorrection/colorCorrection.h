@@ -31,7 +31,7 @@ void colorCorrection(Mat &target, Mat &source, Mat &out, bool adaptiveRange = fa
 //apply color correction to image
 //face is part of target, that is basic of correction
 //color correction better when source is face of source
-void colorCorrection(Mat &target, Mat &face, Mat &source, Mat &out, bool adaptiveRange = false, bool preservePaper = true);
+void colorCorrection(const Mat &target, Mat &face, Mat &source, Mat &out, bool adaptiveRange = false, bool preservePaper = true);
 
 //apply color correction to image, when target, face and source is COLOR_BGR2Lab and CV_32F
 void colorCorrectionWithoutConversion(Mat &target, Mat &face, Mat &source, Mat &out, const bool adaptiveRange, const bool preservePaper);

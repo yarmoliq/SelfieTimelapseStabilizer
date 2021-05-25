@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include "../colorCorrection/colorCorrection.h"
+
 using namespace cv;
 using namespace face;
 
@@ -34,4 +36,6 @@ void calculateLandmarks(const Mat& src, std::vector<Point2f>& output);
 
 void setReferencePoints(const Mat& reference);
 
-void warpStabilize(const Mat& src, Mat& dst);
+void warpStabilize(const Mat& src, Mat& dst, const Mat& ccref);
+
+void detectFace(const Mat& src, Mat& outFace);
